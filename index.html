@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Neko Shop 🐱</title>
+  <style>
+#game {
+  display: block;
+  width: 100%;
+  max-width: 1100px;
+  height: auto;
+  aspect-ratio: 1100 / 720;
+  margin: 0 auto;
+  background: #f4e5d0;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 10px;
+  overflow-x: hidden;
+}
+
+#mobileControls {
+  position: relative;
+  z-index: 10;
+}
+    body {
+      background: #fff0f5;
+      color: #805363;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 15px;
+    }
+
+    
+canvas {
+  display: block;
+  width: 100%;
+  max-width: 1100px;
+  height: auto;
+  border: 4px solid #e8b9cc;
+  border-radius: 12px;
+  background: #f5e6d2;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+    button {
+      padding: 10px;
+      margin: 4px;
+      border: 1px solid #dfa8bb;
+      border-radius: 10px;
+      background: #f7dce7;
+      color: #805363;
+      cursor: pointer;
+    }
+  
+
+#mobileControls {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 25px;
+  width: 100%;
+  max-width: 500px;
+  margin: 15px auto;
+  touch-action: none;
+  user-select: none;
+}
+
+#joystick {
+  width: 130px;
+  height: 130px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #f4d5e3;
+  border: 4px solid #e5a9c4;
+  box-shadow: inset 0 0 0 5px #fbeaf1;
+  position: relative;
+  touch-action: none;
+}
+
+#stick {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  left: 38px;
+  top: 38px;
+  border-radius: 50%;
+  background: #f8b8d2;
+  border: 3px solid #fff1f7;
+  box-shadow: 0 3px 8px #bd829c;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+#mobileControls #mobileAction {
+  width: 115px;
+  min-height: 75px;
+  border: 2px solid #e5a9c4;
+  border-radius: 24px;
+  background: #f7dce7;
+  color: #805363;
+  font-size: 15px;
+  font-weight: bold;
+  touch-action: none;
+}
+
+@media (min-width: 900px) {
+  #mobileControls {
+    max-width: 360px;
+  }
+}
+
+</style>
+#game {
+  display: block;
+  width: 100%;
+  max-width: 1100px;
+  height: auto;
+  aspect-ratio: 1100 / 720;
+  box-sizing: border-box;
+  background: #f4e5d0;
+  touch-action: none;
+}
+
+body {
+  margin: 0;
+  padding: 8px;
+  overflow-x: hidden;
+}
+</head>
+<body>
+  <h1>🐱 Neko Shop 🎀</h1>
+  <p>WASD или стрелки — движение. E — действие.</p>
+
+  <canvas id="game" width="800" height="520"></canvas>
+
+<
+<div id="mobileControls">
+  <div id="joystick">
+    <div id="stick"></div>
+  </div>
+
+  <button id="mobileAction">🐾 Действие</button>
+</div>
+  </div>
+  <button id="mobileAction">🐾 Действие (E)</button>
+</div>
+
+  <p>
+    💰 Деньги: <span id="money">250</span> ₸
+    | Продажи: <span id="sold">0</span>
+    | Уровень: <span id="level">1</span>
+  </p>
+
+  <button id="action">🐾 Действие</button>
+  <button id="delivery">📦 Заказать товары</button>
+  <button id="expand">🏪 Расширить магазин</button>
+  <button id="decorate">🌸 Купить декор</button>
+  <button id="outfit">👗 Сменить наряд</button>
+  <button id="save">💾 Сохранить</button>
+
+  <p id="message">Добро пожаловать в Neko Shop!</p>
+
+  <script src="game.js"></script>
+</body>
+</html>
