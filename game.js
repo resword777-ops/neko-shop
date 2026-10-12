@@ -6,8 +6,8 @@
 const canvas = document.querySelector("#game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 800;
-canvas.height = 520;
+canvas.width = 1100;
+canvas.height = 720;
 
 // Игровое состояние
 const game = {
@@ -47,21 +47,46 @@ const products = [
   { name: "Молоко", emoji: "🥛", price: 16, stock: 5 },
   { name: "Тортик", emoji: "🧁", price: 25, stock: 5 },
   { name: "Клубника", emoji: "🍓", price: 12, stock: 5 },
-  { name: "Игрушка", emoji: "🧸", price: 32, stock: 5 }
-];
+  { name: "Игрушка", emoji: "🧸", price: 32, stock: 5 },
 
+  { name: "Клубничное молоко", emoji: "🍓", price: 20, stock: 8 },
+  { name: "Онигири", emoji: "🍙", price: 18, stock: 8 },
+  { name: "Печенье", emoji: "🍪", price: 14, stock: 8 },
+  { name: "Конфеты", emoji: "🍬", price: 12, stock: 10 },
+  { name: "Пудинг", emoji: "🍮", price: 22, stock: 6 },
+  { name: "Чай боба", emoji: "🧋", price: 28, stock: 6 },
+  { name: "Рамен", emoji: "🍜", price: 30, stock: 5 },
+  { name: "Пончик", emoji: "🍩", price: 17, stock: 8 },
+];
 // Игровые объекты
+
 const shelves = [
-  { x: 200, y: 120, product: 0 },
-  { x: 340, y: 120, product: 1 },
-  { x: 480, y: 120, product: 2 },
-  { x: 620, y: 120, product: 3 }
+  { x: 180, y: 170, product: 0 },
+  { x: 360, y: 170, product: 1 },
+  { x: 540, y: 170, product: 2 },
+  { x: 720, y: 170, product: 3 },
+
+  { x: 180, y: 290, product: 4 },
+  { x: 360, y: 290, product: 5 },
+  { x: 540, y: 290, product: 6 },
+  { x: 720, y: 290, product: 7 },
+
+  { x: 180, y: 410, product: 8 },
+  { x: 360, y: 410, product: 9 },
+  { x: 540, y: 410, product: 10 },
+  { x: 720, y: 410, product: 11 },
+
 ];
 
-const box = { x: 90, y: 400 };
-const cashRegister = { x: 690, y: 300 };
+
+const box = { x: 100, y: 630 };
+const cashRegister = { x: 950, y: 630 };
 
 let carrying = null;
+// Дополнительные данные игры
+let decorations = [];
+let outfit = 0;
+let stock = 20;
 let customers = [];
 let message = "Добро пожаловать в Neko Shop! ♡";
 
@@ -71,14 +96,26 @@ function distance(a, b) {
 }
 
 // Столкновения со стенами и мебелью
+
 function collides(x, y) {
-  if (x < 25 || x > 775 || y < 55 || y > 495) {
+  // Границы большого магазина
+  if (
+    x < 35 ||
+    x > canvas.width - 35 ||
+    y < 70 ||
+    y > canvas.height - 35
+  ) {
     return true;
   }
 
   const objects = [
     { x: box.x, y: box.y, w: 45, h: 40 },
-    { x: cashRegister.x, y: cashRegister.y, w: 70, h: 50 },
+    {
+      x: cashRegister.x,
+      y: cashRegister.y,
+      w: 70,
+      h: 50
+    },
     ...shelves.map(s => ({
       x: s.x,
       y: s.y,
@@ -92,7 +129,6 @@ function collides(x, y) {
     Math.abs(y - o.y) < o.h / 2 + player.size / 2
   );
 }
-
 // Движение персонажа
 function updatePlayer() {
   let dx = 0;
@@ -169,49 +205,242 @@ function interact() {
 
   message = "Подойди к коробке, полке или кассе.";
 }
+let walkFrame = 0;
+let isWalking = false;
+let lastPlayerX = 0;
+let lastPlayerY = 0;
 
 // Рисование кошкодевочки
 function drawPlayer() {
-  ctx.save();
-  ctx.translate(player.x, player.y);
+  
+const t = performance.now() / 250;
 
-  // Тело
-  ctx.fillStyle = player.color;
+ctx.save();
+
+// Анимация шагов
+if (isWalking) {
+  walkFrame += 0.22;
+}
+
+const step = Math.sin(walkFrame);
+const bounce = isWalking
+  ? Math.abs(step) * 2
+  : 0;
+
+ctx.translate(player.x, player.y - bounce);
+ctx.rotate(isWalking ? step * 0.035 : 0);
+
+  // Мягкая тень
+  ctx.fillStyle = "rgba(65, 35, 60, 0.20)";
   ctx.beginPath();
-  ctx.ellipse(0, 5, 13, 16, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 9, 21, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Хвостик с анимацией
+  ctx.strokeStyle = "#292331";
+  ctx.lineWidth = 8;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(9, 5);
+  ctx.quadraticCurveTo(
+    25, 2 + Math.sin(t) * 5,
+    19, -9 + Math.cos(t) * 4
+  );
+  ctx.stroke();
+
+  ctx.strokeStyle = "#f4a2c8";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(11, 5);
+  ctx.quadraticCurveTo(
+    24, 2 + Math.sin(t) * 5,
+    19, -9 + Math.cos(t) * 4
+  );
+  ctx.stroke();
+
+ 
+  // Ножки с анимацией ходьбы
+  const legSwing = isWalking
+    ? Math.sin(walkFrame) * 3
+    : 0;
+
+  ctx.fillStyle = "#292331";
+
+  ctx.beginPath();
+  ctx.ellipse(
+    -8 - legSwing, 11,
+    6, 7,
+    isWalking ? -0.2 - legSwing * 0.04 : -0.2,
+    0, Math.PI * 2
+  );
+  ctx.ellipse(
+    8 + legSwing, 11,
+    6, 7,
+    isWalking ? 0.2 + legSwing * 0.04 : 0.2,
+    0, Math.PI * 2
+  );
+  ctx.fill();
+
+  // Платье
+  ctx.fillStyle = "#302638";
+  ctx.beginPath();
+  ctx.moveTo(-11, -3);
+  ctx.quadraticCurveTo(-17, 5, -19, 13);
+  ctx.quadraticCurveTo(0, 19, 19, 13);
+  ctx.quadraticCurveTo(17, 5, 11, -3);
+  ctx.closePath();
+  ctx.fill();
+
+  // Розовая юбка
+  ctx.fillStyle = "#f5a0ca";
+  ctx.beginPath();
+  ctx.moveTo(-10, 1);
+  ctx.quadraticCurveTo(-14, 8, -18, 13);
+  ctx.quadraticCurveTo(0, 18, 18, 13);
+  ctx.quadraticCurveTo(14, 8, 10, 1);
+  ctx.closePath();
+  ctx.fill();
+
+  // Оборки
+  ctx.strokeStyle = "#fff0f7";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-15, 12);
+  ctx.quadraticCurveTo(-10, 8, -6, 13);
+  ctx.quadraticCurveTo(0, 17, 5, 13);
+  ctx.quadraticCurveTo(11, 8, 15, 12);
+  ctx.stroke();
+
+  // Руки
+  ctx.strokeStyle = "#fff4f4";
+  ctx.lineWidth = 7;
+  ctx.beginPath();
+  ctx.moveTo(-10, -1);
+  ctx.lineTo(-16, 7);
+  ctx.moveTo(10, -1);
+  ctx.lineTo(16, 7);
+  ctx.stroke();
+
+  // Белые лапки
+  ctx.fillStyle = "#fff4f4";
+  ctx.beginPath();
+  ctx.arc(-16, 8, 4, 0, Math.PI * 2);
+  ctx.arc(16, 8, 4, 0, Math.PI * 2);
   ctx.fill();
 
   // Голова
+  ctx.fillStyle = "#302638";
   ctx.beginPath();
-  ctx.arc(0, -12, 15, 0, Math.PI * 2);
+  ctx.ellipse(0, -17, 19, 19, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Кошачьи ушки
+  // Длинные ушки шапочки
   ctx.beginPath();
-  ctx.moveTo(-13, -20);
-  ctx.lineTo(-17, -35);
-  ctx.lineTo(-4, -27);
+  ctx.moveTo(-14, -28);
+  ctx.quadraticCurveTo(-24, -37, -24, -46);
+  ctx.quadraticCurveTo(-12, -43, -5, -31);
+  ctx.closePath();
   ctx.fill();
 
   ctx.beginPath();
-  ctx.moveTo(4, -27);
-  ctx.lineTo(17, -35);
-  ctx.lineTo(13, -20);
+  ctx.moveTo(7, -31);
+  ctx.quadraticCurveTo(17, -44, 26, -43);
+  ctx.quadraticCurveTo(25, -30, 14, -24);
+  ctx.closePath();
   ctx.fill();
 
-  // Глазки
-  ctx.fillStyle = "#654052";
+  // Розовая внутренняя часть ушек
+  ctx.fillStyle = "#f6a1ca";
   ctx.beginPath();
-  ctx.arc(-5, -13, 2, 0, Math.PI * 2);
-  ctx.arc(5, -13, 2, 0, Math.PI * 2);
+  ctx.moveTo(-15, -32);
+  ctx.lineTo(-21, -42);
+  ctx.lineTo(-10, -34);
+  ctx.closePath();
   ctx.fill();
 
-  // Румянец
-  ctx.fillStyle = "#e88eac";
   ctx.beginPath();
-  ctx.arc(-9, -8, 3, 0, Math.PI * 2);
-  ctx.arc(9, -8, 3, 0, Math.PI * 2);
+  ctx.moveTo(13, -31);
+  ctx.lineTo(22, -40);
+  ctx.lineTo(17, -29);
+  ctx.closePath();
   ctx.fill();
+
+  // Мягкая белая мордочка
+  ctx.fillStyle = "#fff8f3";
+  ctx.beginPath();
+  ctx.ellipse(0, -14, 14, 13, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Щёчки
+  ctx.fillStyle = "#ffb3ce";
+  ctx.beginPath();
+  ctx.ellipse(-10, -11, 4, 2.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(10, -11, 4, 2.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Большие блестящие глазки
+  ctx.fillStyle = "#493047";
+  ctx.beginPath();
+  ctx.ellipse(-5.5, -17, 3.1, 4.5, 0, 0, Math.PI * 2);
+  ctx.ellipse(5.5, -17, 3.1, 4.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Блики в глазах
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(-6.3, -19, 1.3, 0, Math.PI * 2);
+  ctx.arc(4.7, -19, 1.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Носик
+  ctx.fillStyle = "#e783ab";
+  ctx.beginPath();
+  ctx.moveTo(-2, -12);
+  ctx.lineTo(2, -12);
+  ctx.lineTo(0, -10);
+  ctx.closePath();
+  ctx.fill();
+
+  // Розовый черепок на лбу
+  ctx.fillStyle = "#ffb7d8";
+  ctx.beginPath();
+  ctx.arc(0, -29, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-3.5, -27, 7, 4);
+
+  ctx.fillStyle = "#8d456c";
+  ctx.beginPath();
+  ctx.arc(-1.7, -30, 1, 0, Math.PI * 2);
+  ctx.arc(1.7, -30, 1, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Бантик на платье
+  ctx.fillStyle = "#ffcae2";
+  ctx.beginPath();
+  ctx.moveTo(-2, 2);
+  ctx.lineTo(-10, -2);
+  ctx.lineTo(-9, 6);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(2, 2);
+  ctx.lineTo(10, -2);
+  ctx.lineTo(9, 6);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = "#e86da6";
+  ctx.beginPath();
+  ctx.arc(0, 2, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Маленькие декоративные блёстки
+  ctx.fillStyle = "#fff1f8";
+  ctx.font = "10px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("✦", -19, -18);
+  ctx.fillText("✦", 18, -8);
 
   ctx.restore();
 }
@@ -236,16 +465,20 @@ function drawShelf(shelf) {
 }
 
 // Рисование всего мира
-function render() {
+function render() {console.log("RENDER запущен");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+ctx.fillStyle = "red";
+ctx.fillRect(0, 0, 200, 100);
+ctx.fillStyle = "white";
+ctx.font = "24px sans-serif";
+ctx.fillText("TEST", 20, 60);
   // Кремовый пол
   ctx.fillStyle = "#f4e5d0";
-  ctx.fillRect(0, 0, 800, 520);
-
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
   // Плитка
-  for (let y = 0; y < 520; y += 32) {
-    for (let x = 0; x < 800; x += 32) {
+  for (let y = 0; y < canvas.height; y += 32) {
+  for (let x = 0; x < canvas.width; x += 32) {
       ctx.fillStyle =
         (x / 32 + y / 32) % 2
           ? "#f7ebdc"
@@ -255,12 +488,27 @@ function render() {
     }
   }
 
-  // Стены
+  
+  // Стены большого магазина
   ctx.fillStyle = "#c99485";
-  ctx.fillRect(10, 40, 780, 9);
-  ctx.fillRect(10, 40, 9, 470);
-  ctx.fillRect(781, 40, 9, 470);
-  ctx.fillRect(10, 501, 780, 9);
+
+  // Верхняя стена
+  ctx.fillRect(10, 30, canvas.width - 20, 12);
+
+  // Левая стена
+  ctx.fillRect(0, 40, 12, canvas.height - 40);
+
+  // Правая стена
+  ctx.fillRect(
+    canvas.width - 12,
+    40,
+    30,
+    canvas.height - 40
+  );
+
+  // Нижняя стена с проходом у входа
+  ctx.fillRect(10, canvas.height - 10, 300, 12);
+  ctx.fillRect(410, canvas.height - 10, canvas.width - 420, 12);
 
   // Коробка поставок
   ctx.fillStyle = "#c79a70";
@@ -274,17 +522,17 @@ function render() {
   // Касса
   ctx.fillStyle = "#dfa8bb";
   ctx.fillRect(
-    cashRegister.x - 35,
-    cashRegister.y - 25,
-    70,
-    50
+    cashRegister.x - 25,
+    cashRegister.y - 20,
+    50,
+    40
   );
 
   ctx.font = "25px sans-serif";
   ctx.fillText("🧾", cashRegister.x, cashRegister.y + 8);
 
   drawPlayer();
-
+console.log("Куроми нарисована");
   // Интерфейс
   ctx.fillStyle = "#805363";
   ctx.font = "bold 17px sans-serif";
@@ -297,27 +545,55 @@ function render() {
   ctx.fillText("Деньги: " + game.money + " ₸", 30, 120);
 
   ctx.fillStyle = "#fff8ef";
-  ctx.fillRect(180, 455, 440, 35);
+  ctx.fillRect(310, 75, 440, 35);
 
   ctx.fillStyle = "#805363";
   ctx.textAlign = "center";
-  ctx.fillText(message, 400, 477);
+  ctx.fillText(message, 530, 100);
 }
 
 // Интерфейс
 function updateStats() {
-  document.querySelector("#money").textContent = game.money;
-  document.querySelector("#sold").textContent = game.sold;
-  document.querySelector("#level").textContent = game.level;
-  document.querySelector("#carry").textContent =
-    carrying ? carrying.name : "нет";
+  const moneyElement = document.querySelector("#money");
+  const soldElement = document.querySelector("#sold");
+  const levelElement = document.querySelector("#level");
+  const carryElement = document.querySelector("#carry");
+
+  if (moneyElement) {
+    moneyElement.textContent = game.money;
+  }
+
+  if (soldElement) {
+    soldElement.textContent = game.sold;
+  }
+
+  if (levelElement) {
+    levelElement.textContent = game.level;
+  }
+
+  if (carryElement) {
+    carryElement.textContent = carrying ? carrying.name : "нет";
+  }
 }
 
 // Игровой цикл
+
 function gameLoop() {
   if (!game.running) return;
 
+  const oldX = player.x;
+  const oldY = player.y;
+
   updatePlayer();
+
+  isWalking =
+    Math.abs(player.x - oldX) > 0.01 ||
+    Math.abs(player.y - oldY) > 0.01;
+
+  if (isWalking) {
+    walkFrame += 0.22;
+  }
+
   render();
   updateStats();
 
@@ -389,8 +665,13 @@ document.querySelector("#action").onclick = interact;
 // Сохранение
 document.querySelector("#save").onclick = () => {
   const data = {
-    game, player, products, shelves,
-    decorations, stock, sold, money, level
+    game,
+    player,
+    products,
+    shelves,
+    decorations,
+    stock,
+    carrying
   };
 
   localStorage.setItem("nekoShopSave", JSON.stringify(data));
@@ -398,18 +679,66 @@ document.querySelector("#save").onclick = () => {
 };
 
 // Сенсорные кнопки
-document.querySelectorAll("[data-key]").forEach(button => {
-  const key = button.dataset.key.toLowerCase();
 
-  button.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    keys[key] = true;
-    button.setPointerCapture(e.pointerId);
+const joystick = document.querySelector("#joystick");
+const stick = document.querySelector("#stick");
+const mobileAction = document.querySelector("#mobileAction");
+
+if (joystick && stick) {
+  let joystickPointer = null;
+
+  function moveStick(event) {
+    const rect = joystick.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    let dx = event.clientX - centerX;
+    let dy = event.clientY - centerY;
+
+    const maxDistance = 35;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance > maxDistance) {
+      dx = dx / distance * maxDistance;
+      dy = dy / distance * maxDistance;
+    }
+
+    keys.a = dx < -8;
+    keys.d = dx > 8;
+    keys.w = dy < -8;
+    keys.s = dy > 8;
+
+    stick.style.left = `${35 + dx}px`;
+    stick.style.top = `${35 + dy}px`;
+  }
+
+  function releaseStick() {
+    joystickPointer = null;
+    keys.a = keys.d = keys.w = keys.s = false;
+    stick.style.left = "35px";
+    stick.style.top = "35px";
+  }
+
+  joystick.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    joystickPointer = event.pointerId;
+    joystick.setPointerCapture(event.pointerId);
+    moveStick(event);
   });
 
-  ["pointerup", "pointercancel", "lostpointercapture"].forEach(event => {
-    button.addEventListener(event, () => keys[key] = false);
+  joystick.addEventListener("pointermove", event => {
+    if (event.pointerId === joystickPointer) {
+      moveStick(event);
+    }
   });
-});
+
+  joystick.addEventListener("pointerup", releaseStick);
+  joystick.addEventListener("pointercancel", releaseStick);
+  joystick.addEventListener("lostpointercapture", releaseStick);
+}
+
+if (mobileAction) {
+  mobileAction.addEventListener("click", () => interact());
+}
 
 gameLoop();
